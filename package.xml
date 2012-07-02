@@ -278,7 +278,7 @@ Fixed:
 - Installation failing because of config file being named "config.php"
   pecl/pear installer issue?
 - Some compilation warnings
-- Deffered mode taking only the *mysql* error_reporting into account
+- Deferred mode taking only the *mysql* error_reporting into account
 - APM not correctly linking to libmysqlclient
 - Possible buffer overflows
 - Compilation issues related to timelib with PHP >= 5.3.9
@@ -336,7 +336,7 @@ Fixed:
 Added:
 - MySQL driver
 - Per driver error reporting level
-- Asynchronous processing of events (config option: apm.deffered_processing)
+- Asynchronous processing of events (config option: apm.deferred_processing)
 
 Changed:
 - Code refactored to make use of 'APM drivers'

@@ -156,8 +156,8 @@ ZEND_BEGIN_MODULE_GLOBALS(apm)
 	zend_bool store_cookies;
 	/* Boolean controlling whether the POST variables should be generated or not */
 	zend_bool store_post;
-	/* Boolean controlling whether the processing of events by drivers should be deffered at the end of the request */
-	zend_bool deffered_processing;
+	/* Boolean controlling whether the processing of events by drivers should be deferred at the end of the request */
+	zend_bool deferred_processing;
 	/* Time (in ms) before a request is considered 'slow' */
 	long      slow_request_duration;
 	/* Maximum recursion depth used when dumping a variable */

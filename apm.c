@@ -111,7 +111,7 @@ void apm_error_cb(int type, const char *error_filename,
 void apm_throw_exception_hook(zval *exception TSRMLS_DC);
 
 static void insert_event(int, char *, uint, char * TSRMLS_DC);
-static void deffered_insert_events(TSRMLS_D);
+static void deferred_insert_events(TSRMLS_D);
 
 /* recorded timestamp for the request */
 struct timeval begin_tp;
@@ -174,8 +174,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("apm.store_cookies",        "1",   PHP_INI_ALL, OnUpdateBool, store_cookies,         zend_apm_globals, apm_globals)
 	/* Boolean controlling whether the POST variables should be stored or not */
 	STD_PHP_INI_BOOLEAN("apm.store_post",           "1",   PHP_INI_ALL, OnUpdateBool, store_post,            zend_apm_globals, apm_globals)
-	/* Boolean controlling whether the processing of events by drivers should be deffered at the end of the request */
-	STD_PHP_INI_BOOLEAN("apm.deffered_processing",  "1",   PHP_INI_PERDIR, OnUpdateBool, deffered_processing,zend_apm_globals, apm_globals)
+	/* Boolean controlling whether the processing of events by drivers should be deferred at the end of the request */
+	STD_PHP_INI_BOOLEAN("apm.deferred_processing",  "1",   PHP_INI_PERDIR, OnUpdateBool, deferred_processing,zend_apm_globals, apm_globals)
 	/* Time (in ms) before a request is considered 'slow' */
 	STD_PHP_INI_ENTRY("apm.slow_request_duration",  "100", PHP_INI_ALL, OnUpdateLong, slow_request_duration, zend_apm_globals, apm_globals)
 	/* Maximum recursion depth used when dumping a variable */
@@ -330,9 +330,9 @@ PHP_RSHUTDOWN_FUNCTION(apm)
 			}
 		}
 
-		if (APM_G(deffered_processing) && APM_G(events) != *APM_G(last_event)) {
-			APM_DEBUG("Events to insert in deffered processing\n");
-			deffered_insert_events(TSRMLS_C);
+		if (APM_G(deferred_processing) && APM_G(events) != *APM_G(last_event)) {
+			APM_DEBUG("Events to insert in deferred processing\n");
+			deferred_insert_events(TSRMLS_C);
 
 			apm_event_entry * event_entry_cursor = APM_G(events);
 			apm_event_entry * event_entry_cursor_next = event_entry_cursor->next;
@@ -441,8 +441,8 @@ static void insert_event(int type, char * error_filename, uint error_lineno, cha
 		smart_str_0(&trace_str);
 	}
 
-	if (APM_G(deffered_processing)) {
-		APM_DEBUG("Registering event for deffered processing\n");
+	if (APM_G(deferred_processing)) {
+		APM_DEBUG("Registering event for deferred processing\n");
 		(*APM_G(last_event))->next = (apm_event_entry *) malloc(sizeof(apm_event_entry));
 		(*APM_G(last_event))->next->event.type = type;
 
@@ -501,14 +501,14 @@ static void insert_event(int type, char * error_filename, uint error_lineno, cha
 	smart_str_free(&trace_str);
 }
 
-static void deffered_insert_events(TSRMLS_D)
+static void deferred_insert_events(TSRMLS_D)
 {
 	apm_driver_entry * driver_entry = APM_G(drivers);
 	apm_event_entry * event_entry_cursor;
 
 	EXTRACT_DATA();
 
-	APM_DEBUG("Deffered processing loop begin\n");
+	APM_DEBUG("Deferred processing loop begin\n");
 	while ((driver_entry = driver_entry->next) != NULL) {
 		if (driver_entry->driver.is_enabled()) {
 			event_entry_cursor = APM_G(events);
@@ -532,7 +532,7 @@ static void deffered_insert_events(TSRMLS_D)
 			}
 		}
 	}
-	APM_DEBUG("Deffered processing loop end\n");
+	APM_DEBUG("Deferred processing loop end\n");
 
 	smart_str_free(&cookies);
 	smart_str_free(&post_vars);
